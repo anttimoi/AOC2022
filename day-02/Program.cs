@@ -64,7 +64,7 @@ namespace day_02
         public GameResult Target { get; set; }
     }
 
-    public class GameRules
+    public static class GameRules
     {
         public static GameResult GetResult(ShapePair x)
         {
@@ -72,31 +72,21 @@ namespace day_02
             {
                 return GameResult.Draw;
             }
-
-            // TODO ternary
-            if (Shapes.Exists(y => y.Item1 == x.Player && y.Item2 == x.Opponent))
-            {
-                return GameResult.PlayerWon;
-            }
-
-            return GameResult.OpponentWon;
+            
+            return Shapes.Exists(y => y.Item1 == x.Player && y.Item2 == x.Opponent)
+                ? GameResult.PlayerWon
+                : GameResult.OpponentWon;
         }
 
-        public static Shape GetTargetShape(Shape opponent, GameResult target)
-        {
-            if (target == GameResult.Draw)
+        public static Shape GetTargetShape(Shape opponent, GameResult target) =>
+            target switch
             {
-                return opponent;
-            }
-
-            if (target == GameResult.PlayerWon)
-            {
-                return Shapes.Find(x => x.Item2 == opponent).Item1;
-            }
-
-            return Shapes.Find(x => x.Item1 == opponent).Item2;
-        }
-
+                GameResult.Draw => opponent,
+                GameResult.PlayerWon => Shapes.Find(x => x.Item2 == opponent).Item1,
+                GameResult.OpponentWon => Shapes.Find(x => x.Item1 == opponent).Item2,
+                _ => throw new ArgumentException("Unexpected target")
+            };
+        
         // First item beats second
         private static readonly List<Tuple<Shape, Shape>> Shapes = new List<Tuple<Shape, Shape>>()
         {
@@ -147,20 +137,15 @@ namespace day_02
     
     class Tournament
     {
-        public Tournament()
+        public Tournament(ITournamentStrategy strategy)
         {
             _games = new List<Game>();
+            _strategy = strategy;
         }
 
-        public void PlayGame(ShapePair x)
+        public void PlayGame(string x)
         {
-            _games.Add(new Game(x));
-        }
-
-        public void PlayGame2(ShapeAndTarget x)
-        {
-            var playerShape = GameRules.GetTargetShape(x.Opponent, x.Target);
-            _games.Add(new Game(new ShapePair(){ Player = playerShape, Opponent = x.Opponent}));
+            _games.Add(new Game(_strategy.GetShapePairFromString(x)));
         }
         
         public int GetPlayerScore() {
@@ -173,34 +158,52 @@ namespace day_02
         }
         
         private List<Game> _games;
+        private ITournamentStrategy _strategy;
     }
 
+    interface ITournamentStrategy
+    {
+        ShapePair GetShapePairFromString(string x);
+    }
+    
+    class SelectedShapeStrategy : ITournamentStrategy
+    {
+        public ShapePair GetShapePairFromString(string x)
+        {
+            var (opponentShape, playerShape) = InputParser.GetInputArgumentsFromString(x);
+            return new ShapePair()
+            {
+                Player = InputParser.GetShapeFromString(playerShape),
+                Opponent = InputParser.GetShapeFromString(opponentShape),
+            };
+        }
+    }
+
+    class TargetResultStrategy : ITournamentStrategy
+    {
+        public ShapePair GetShapePairFromString(string x)
+        {
+            var (opponentString, targetResultString) = InputParser.GetInputArgumentsFromString(x);
+            var opponent = InputParser.GetShapeFromString(opponentString);
+            var player = GameRules.GetTargetShape(
+                opponent,
+                InputParser.GetTargetResultFromString(targetResultString)
+            );
+            return new ShapePair(){ Player = player, Opponent = opponent};
+        }
+    }
+    
     class Day02
     {
         static void Main(string[] args)
         {
-            var tournament = new Tournament();
-            var tournament2 = new Tournament();
+            var tournament = new Tournament(new SelectedShapeStrategy());
+            var tournament2 = new Tournament(new TargetResultStrategy());
             
             foreach (string line in System.IO.File.ReadLines("input.txt"))
             {
-                var (opponentShape, playerShape) = InputParser.GetInputArgumentsFromString(line);
-                ShapePair x = new ShapePair()
-                {
-                    Player = InputParser.GetShapeFromString(playerShape),
-                    Opponent = InputParser.GetShapeFromString(opponentShape),
-                };
-
-                tournament.PlayGame(x);
-                
-                var (_, targetResult) = InputParser.GetInputArgumentsFromString(line);
-                ShapeAndTarget y = new ShapeAndTarget()
-                {
-                    Opponent = InputParser.GetShapeFromString(opponentShape),
-                    Target = InputParser.GetTargetResultFromString(targetResult),
-                };
-                    
-                tournament2.PlayGame2(y);
+                tournament.PlayGame(line);
+                tournament2.PlayGame(line);
             }
 
             Console.WriteLine(tournament.GetPlayerScore());
