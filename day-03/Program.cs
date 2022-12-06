@@ -99,7 +99,7 @@ namespace  day_03
                 .Sum();
             
             Console.WriteLine(prioritySum);
-
+            
             const int chunkSize = 3;
             var rucksackCharacters = rucksacks
                 .Chunk(chunkSize)
