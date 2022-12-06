@@ -1,14 +1,14 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Linq;
+﻿using System.Linq;
+using AOC2022.Core;
 
-namespace day_01
+namespace AOC2022.Day01
 { 
-    public class Food
+    internal class Food
     {
         public int Calories { get; set; }
     }
 
-    public class Elf
+    internal class Elf
     {
         public Elf()
         {
@@ -28,7 +28,7 @@ namespace day_01
         private List<Food> _food;
     }
 
-    public class ElfCollection
+    internal class ElfCollection
     {
         public ElfCollection()
         {
@@ -53,14 +53,13 @@ namespace day_01
         private List<Elf> _elves;
     }
 
-    class Day01
+    public abstract class Day01Puzzle
     {
-        static void Main(string[] args)
+        public string Solve(IEnumerable<string> input, int chunkSize)
         {
             var elves = new ElfCollection();
-
-
-            foreach (string line in System.IO.File.ReadLines("input.txt"))
+            
+            foreach (string line in input)
             {
                 if (Int32.TryParse(line, out int calories))
                 {
@@ -71,9 +70,23 @@ namespace day_01
                     elves.AddNewElf();
                 }
             }
+            return elves.GetTopCaloryCarryingElves(chunkSize).Sum(x => x.TotalFoodCalories).ToString();            
+        }
+    }
+    
+    public class Day01Puzzle01 : Day01Puzzle, IPuzzle
+    {
+        public string Solve(IEnumerable<string> input)
+        {
+            return Solve(input, 1);
+        }
+    }
 
-            System.Console.WriteLine(elves.GetTopCaloryCarryingElves(1).Sum(x => x.TotalFoodCalories));
-            System.Console.WriteLine(elves.GetTopCaloryCarryingElves(3).Sum(x => x.TotalFoodCalories));
+    public class Day01Puzzle02 : Day01Puzzle, IPuzzle
+    {
+        public string Solve(IEnumerable<string> input)
+        {
+            return Solve(input, 3);
         }
     }
 }

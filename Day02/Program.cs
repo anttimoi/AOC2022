@@ -1,23 +1,23 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Linq;
+﻿using System.Linq;
+using AOC2022.Core;
 
-namespace day_02
+namespace AOC2022.Day02
 {
-    public enum Shape
+    internal enum Shape
     {
         Rock,
         Paper,
         Scissors,
     }
 
-    public enum GameResult
+    internal enum GameResult
     {
         PlayerWon,
         OpponentWon,
         Draw,
     }
 
-    public class InputParser
+    internal class InputParser
     {
         public static Shape GetShapeFromString(string x) =>
             x switch
@@ -52,19 +52,19 @@ namespace day_02
         }        
     }
 
-    public class ShapePair
+    internal class ShapePair
     {
         public Shape Player { get; set; }
         public Shape Opponent { get; set; }
     }
 
-    public class ShapeAndTarget
+    internal class ShapeAndTarget
     {
         public Shape Opponent { get; set; }
         public GameResult Target { get; set; }
     }
 
-    public static class GameRules
+    internal static class GameRules
     {
         public static GameResult GetResult(ShapePair x)
         {
@@ -96,7 +96,7 @@ namespace day_02
         };
     }
     
-    public class Game
+    internal class Game
     {
         public Shape PlayerShape { get; }
         public Shape OpponentShape { get; }
@@ -193,21 +193,34 @@ namespace day_02
         }
     }
     
-    class Day02
+    internal static class Day02Puzzle
     {
-        static void Main(string[] args)
+        public static string Solve(ITournamentStrategy strategy, IEnumerable<string> input)
         {
-            var tournament = new Tournament(new SelectedShapeStrategy());
-            var tournament2 = new Tournament(new TargetResultStrategy());
-            
-            foreach (string line in System.IO.File.ReadLines("input.txt"))
+            var tournament = new Tournament(strategy);
+
+            foreach (string line in input)
             {
                 tournament.PlayGame(line);
-                tournament2.PlayGame(line);
             }
 
-            Console.WriteLine(tournament.GetPlayerScore());
-            Console.WriteLine(tournament2.GetPlayerScore());
+            return tournament.GetPlayerScore().ToString();
         }
     }
+    
+    public class Day02Puzzle01 : IPuzzle
+    {
+        public string Solve(IEnumerable<string> input)
+        {
+            return Day02Puzzle.Solve(new SelectedShapeStrategy(), input);
+        }
+    }
+    
+    public class Day02Puzzle02 : IPuzzle
+    {
+        public string Solve(IEnumerable<string> input)
+        {
+            return Day02Puzzle.Solve(new TargetResultStrategy(), input);
+        }
+    }    
 }

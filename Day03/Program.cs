@@ -1,9 +1,10 @@
 ﻿using System.Linq;
 using System.IO;
+using AOC2022.Core;
 
-namespace  day_03
+namespace AOC2022.Day03
 {
-    public static class ItemPriority
+    internal static class ItemPriority
     {
         public static int Get(char x)
         {
@@ -27,7 +28,7 @@ namespace  day_03
         private static char _lastUppercase = 'Z';        
     }
 
-    public class Rucksack
+    internal class Rucksack
     {
         private string _contents;
 
@@ -60,7 +61,7 @@ namespace  day_03
         }
     }
 
-    public class CharCounter
+    internal class CharCounter
     {
         public static char GetCharWithCount(List<char> chars, int count)
         {
@@ -70,7 +71,7 @@ namespace  day_03
         }
     }
 
-    public static class Helpers
+    internal static class Helpers
     {
         public static List<char> GetDistinctItems(Rucksack x)
         {
@@ -86,20 +87,27 @@ namespace  day_03
         }
     }
 
-    class Day03
+    public class Day03Puzzle01 : IPuzzle
     {
-        static void Main(string[] args)
+        public string Solve(IEnumerable<string> input)
         {
-            var rucksacks = File.ReadLines("input.txt")
-                .Select(x => new Rucksack(x));
-                
+            var rucksacks = input.Select(x => new Rucksack(x));
+
             var prioritySum = rucksacks
                 .Select(x => x.FindCommonItemInCompartments())
                 .Select(ItemPriority.Get)
                 .Sum();
-            
-            Console.WriteLine(prioritySum);
-            
+
+            return prioritySum.ToString();
+        }
+    }
+
+    public class Day03Puzzle02 : IPuzzle
+    {
+        public string Solve(IEnumerable<string> input)
+        {
+            var rucksacks = input.Select(x => new Rucksack(x));
+
             const int chunkSize = 3;
             var rucksackCharacters = rucksacks
                 .Chunk(chunkSize)
@@ -109,8 +117,8 @@ namespace  day_03
                 .Select(x => CharCounter.GetCharWithCount(x, chunkSize))
                 .Select(ItemPriority.Get)
                 .Sum();
-            
-            Console.WriteLine(prioritySum2);
+
+            return prioritySum2.ToString();
         }
     }
 }

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <RootNamespace>AOC2022.Day02</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>10</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Core\Core.csproj" />
+    </ItemGroup>
+
+</Project>
